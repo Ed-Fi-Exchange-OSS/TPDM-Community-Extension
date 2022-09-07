@@ -1,0 +1,32 @@
+name: Load Ed-Fi ODS
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  load:
+    runs-on: windows-latest
+
+    steps:
+      - name: Install SQL Server 2019 DE
+        run: |
+          choco install sql-server-2019 -r
+          
+      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579
+        with:
+          repository: Ed-Fi-Alliance-OSS/Ed-Fi-ODS
+          #ref: ${{ env.version_informational }}
+          path: Ed-Fi-ODS
+
+      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579
+        with:
+          repository: Ed-Fi-Alliance-OSS/Ed-Fi-ODS-Implementation
+          #ref: ${{ env.version_informational }}
+          path: Ed-Fi-ODS-Implementation
+          
+      - name: Download TPDM-Community-Extension Artifact
+        uses: dawidd6/action-download-artifact@1cf11afe3f1874cee82a8d5a2b45c0fd63f0fa22
+        with:
+          workflow: build-nuget-package.yml
+          path: TPDM-Community-Extension
