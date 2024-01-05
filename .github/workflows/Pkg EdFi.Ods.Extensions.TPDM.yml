@@ -3,7 +3,7 @@
 # The Ed-Fi Alliance licenses this file to you under the Apache License, Version 2.0.
 # See the LICENSE and NOTICES files in the project root for more information.
 
-name: Pkg EdFi.Ods.Extensions.TPDM
+name: Build TPDM-Community Extension Package
 
 on:
   push:
@@ -16,7 +16,7 @@ on:
       INFORMATIONAL_VERSION:
         type: string
         required: false
-        description: "ODS_version: Ed-Fi ODS/API version. Default: 7.0"
+        description: "ODS_version: Ed-Fi ODS/API version. Default: 7.1"
       Ed-Fi-ODS-ref:
         type: string
         required: false
@@ -29,9 +29,9 @@ on:
         type: string
         required: false
         description: "Data-Standard-Version: The version of the Data Standard the extention package will work with. Default: 5.0.0"
-        
+
 env:
-  INFORMATIONAL_VERSION: "7.0"
+  INFORMATIONAL_VERSION: "7.1"
   BUILD_INCREMENTER: "1"
   CONFIGURATION: "Release"
   HEAD_REF:  ${{ GITHUB.HEAD_REF }}
@@ -42,11 +42,11 @@ env:
 
 jobs:
   FindStandardAndExtensionVersions:
-    runs-on: ubuntu-latest    
+    runs-on: ubuntu-latest
     outputs:
       StandardVersions: ${{ steps.Set_StandardVersions.outputs.StandardVersions }}
       ExtensionVersions: ${{ steps.Set_ExtensionVersions.outputs.ExtensionVersions }}
-      
+
     steps:
     - name: Set env variables
       shell: pwsh
@@ -67,27 +67,27 @@ jobs:
     - name: Checkout Ed-Fi-Extensions
       uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # v2
       with:
-          path: Ed-Fi-Extensions/    
-   
+          path: Ed-Fi-Extensions/
+
     - name: Checkout Ed-Fi-ODS
       uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # v2
       with:
           repository: Ed-Fi-Alliance-OSS/Ed-Fi-ODS
           path: Ed-Fi-ODS/
-          ref: ${{ env.ods_ref }}    
-          
+          ref: ${{ env.ods_ref }}
+
     - name: Checkout Ed-Fi-ODS-Implementation
       uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # v2
       with:
           repository: Ed-Fi-Alliance-OSS/Ed-Fi-ODS-Implementation
           path: Ed-Fi-ODS-Implementation/
           ref: ${{ env.ods_ref_implementation }}
-          
+
     - name: Is pull request branch exists in Ed-Fi-ODS
       working-directory: ./Ed-Fi-Extensions/
       shell: pwsh
       run: |
-        .\build.githubactions.ps1 CheckoutBranch -RelativeRepoPath "../Ed-Fi-ODS"          
+        .\build.githubactions.ps1 CheckoutBranch -RelativeRepoPath "../Ed-Fi-ODS"
     - name: Set StandardVersions
       id: Set_StandardVersions
       working-directory: ./Ed-Fi-ODS/
@@ -99,7 +99,7 @@ jobs:
       shell: pwsh
     - name: Set ExtensionVersions
       id: Set_ExtensionVersions
-      working-directory: ./Ed-Fi-Extensions/  
+      working-directory: ./Ed-Fi-Extensions/
       run: |
         $output = .\build.githubactions.ps1 ExtensionVersions -ProjectFile "$env:GITHUB_WORKSPACE/Ed-Fi-Extensions/Extensions/EdFi.Ods.Extensions.TPDM/EdFi.Ods.Extensions.TPDM.csproj"
         echo "ExtensionVersions=$output" >> $env:GITHUB_OUTPUT
@@ -113,10 +113,10 @@ jobs:
       matrix:
         StandardVersion: ${{ fromJson(needs.FindStandardAndExtensionVersions.outputs.StandardVersions) }}
         ExtensionVersion: ${{ fromJson(needs.FindStandardAndExtensionVersions.outputs.ExtensionVersions) }}
-    name: build (Standard ${{ matrix.StandardVersion }} Extension ${{ matrix.ExtensionVersion }})        
+    name: build (Standard ${{ matrix.StandardVersion }} Extension ${{ matrix.ExtensionVersion }})
     steps:
     - name: echo distinct ID ${{ github.event.inputs.distinct_id }}
-      run:  echo "${{ github.event.inputs.distinct_id }}" 
+      run:  echo "${{ github.event.inputs.distinct_id }}"
 
     - name: Setup .NET
       uses: actions/setup-dotnet@c0d4ad69d8bd405d234f1c9166d383b7a4f69ed8 # v2.1.0
@@ -127,21 +127,22 @@ jobs:
       uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # v2
       with:
           path: Ed-Fi-Extensions/
-       
+          ref: TPDMDEV-793
+
     - name: Checkout Ed-Fi-ODS
       uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # v2
       with:
           repository: Ed-Fi-Alliance-OSS/Ed-Fi-ODS
           path: Ed-Fi-ODS/
           ref: ${{ env.ods_ref }}
-          
+
     - name: Checkout Ed-Fi-ODS-Implementation
       uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # v2
       with:
           repository: Ed-Fi-Alliance-OSS/Ed-Fi-ODS-Implementation
           path: Ed-Fi-ODS-Implementation/
           ref: ${{ env.ods_ref_implementation }}
-          
+
     - name: Download TPDM-Community-Model Artifact
       uses: dawidd6/action-download-artifact@1cf11afe3f1874cee82a8d5a2b45c0fd63f0fa22
       with:
@@ -154,7 +155,7 @@ jobs:
       run: |
           cd *
           cp -RT ./* ${{ github.workspace }}/Ed-Fi-Extensions/Extensions/EdFi.Ods.Extensions.TPDM/Versions/
-          
+
     - name: Is pull request branch exists in Ed-Fi-ODS-Implementation
       working-directory: ./Ed-Fi-Extensions/
       shell: pwsh
@@ -164,14 +165,14 @@ jobs:
       working-directory: ./Ed-Fi-Extensions/
       shell: pwsh
       run: |
-        .\build.githubactions.ps1 CheckoutBranch -RelativeRepoPath "../Ed-Fi-ODS"   
-    - name: Cache Nuget packages       
+        .\build.githubactions.ps1 CheckoutBranch -RelativeRepoPath "../Ed-Fi-ODS"
+    - name: Cache Nuget packages
       uses: actions/cache@58c146cc91c5b9e778e71775dfe9bf1442ad9a12 #v3.2.3
       with:
         path: ~/.nuget/packages
         key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj*') }}
         restore-keys: |
-          ${{ runner.os }}-nuget-  
+          ${{ runner.os }}-nuget-
     - name: Run CodeGen
       run: |
           $ErrorActionPreference = 'Stop'
@@ -189,7 +190,7 @@ jobs:
         .\build.githubactions.ps1 build -Configuration ${{ env.CONFIGURATION }} -InformationalVersion ${{ env.INFORMATIONAL_VERSION}} -BuildCounter ${{ github.run_number }} -BuildIncrementer ${{env.BUILD_INCREMENTER}} -ProjectFile "$env:GITHUB_WORKSPACE/Ed-Fi-Extensions/Extensions/EdFi.Ods.Extensions.TPDM/EdFi.Ods.Extensions.TPDM.csproj"  -StandardVersion ${{ matrix.StandardVersion }}
       shell: pwsh
     - name: pack using nuget nuspec file
-      working-directory: ./Ed-Fi-Extensions/   
+      working-directory: ./Ed-Fi-Extensions/
       shell: pwsh
       run: |
         .\build.githubactions.ps1 pack -Configuration ${{ env.CONFIGURATION }} -InformationalVersion ${{ env.INFORMATIONAL_VERSION}} -BuildCounter ${{ github.run_number }} -BuildIncrementer ${{env.BUILD_INCREMENTER}} -PackageName "EdFi.Suite3.Ods.Extensions.TPDM.Community.${{ matrix.ExtensionVersion }}.Standard.${{ matrix.StandardVersion }}"  -ExtensionVersion ${{ matrix.ExtensionVersion }} -StandardVersion ${{ matrix.StandardVersion }} -NuspecFilePath "$env:GITHUB_WORKSPACE/Ed-Fi-Extensions/Extensions/EdFi.Ods.Extensions.TPDM/EdFi.Ods.Extensions.TPDM.nuspec"
@@ -197,12 +198,12 @@ jobs:
       working-directory: ./Ed-Fi-Extensions/
       run: |
         .\build.githubactions.ps1 MaximumPathLengthLimitation -Configuration ${{ env.CONFIGURATION }} -InformationalVersion ${{ env.INFORMATIONAL_VERSION}} -BuildCounter ${{ github.run_number }} -BuildIncrementer ${{env.BUILD_INCREMENTER}} -PackageName "EdFi.Suite3.Ods.Extensions.TPDM.Community.${{ matrix.ExtensionVersion }}.Standard.${{ matrix.StandardVersion }}"
-      shell: pwsh      
+      shell: pwsh
     - name: Install-credential-handler
       working-directory: ./Ed-Fi-Extensions/
       run: |
         .\build.githubactions.ps1 InstallCredentialHandler
-      shell: pwsh     
+      shell: pwsh
     - name: Upload EdFi.Ods.Extensions.TPDM Artifact
       if: success()
       uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8 # v3.1.0
