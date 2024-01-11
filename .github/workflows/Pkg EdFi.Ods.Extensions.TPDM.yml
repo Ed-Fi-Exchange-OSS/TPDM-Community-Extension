@@ -173,8 +173,6 @@ jobs:
         key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj*') }}
         restore-keys: |
           ${{ runner.os }}-nuget-
-    - name: Setup tmate session
-      uses: mxschmitt/action-tmate@v3
     - name: Run CodeGen
       run: |
           $ErrorActionPreference = 'Stop'
