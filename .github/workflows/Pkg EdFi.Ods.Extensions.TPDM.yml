@@ -42,7 +42,7 @@ env:
 
 jobs:
   FindStandardAndExtensionVersions:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     outputs:
       StandardVersions: ${{ steps.Set_StandardVersions.outputs.StandardVersions }}
       ExtensionVersions: ${{ steps.Set_ExtensionVersions.outputs.ExtensionVersions }}
