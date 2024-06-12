@@ -2,10 +2,12 @@ name: Publish to Azure Artifacts
 
 on:
   workflow_dispatch:
-  
+
+permissions: read-all
+
 env:
   AZURE_ARTIFACTS_FEED_URL: https://pkgs.dev.azure.com/ed-fi-alliance/Ed-Fi-Alliance-OSS/_packaging/EdFi/nuget/v3/index.json
-  NUGET_AUTH_TOKEN: ${{ secrets.TPDM_AA_PUBLISH }} 
+  NUGET_AUTH_TOKEN: ${{ secrets.TPDM_AA_PUBLISH }}
 
 jobs:
   publish:
@@ -17,13 +19,13 @@ jobs:
         with:
           source-url: ${{ env.AZURE_ARTIFACTS_FEED_URL }}
         env:
-          NUGET_AUTH_TOKEN: ${{ secrets.TPDM_AA_PUBLISH }} 
+          NUGET_AUTH_TOKEN: ${{ secrets.TPDM_AA_PUBLISH }}
 
       - name: Download package
         uses: dawidd6/action-download-artifact@1cf11afe3f1874cee82a8d5a2b45c0fd63f0fa22
         with:
           workflow: Pkg EdFi.Ods.Extensions.TPDM.yml
           path: publish
-      
+
       - name: Publish
         run: dotnet nuget push publish/*/*.nupkg --api-key AzureArtifacts
