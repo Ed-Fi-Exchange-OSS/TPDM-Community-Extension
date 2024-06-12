@@ -30,6 +30,8 @@ on:
         required: false
         description: "Data-Standard-Version: The version of the Data Standard the extention package will work with. Default: 5.1.0"
 
+permissions: read-all
+
 env:
   INFORMATIONAL_VERSION: "7.2"
   BUILD_INCREMENTER: "1"
